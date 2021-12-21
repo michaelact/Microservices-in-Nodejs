@@ -1,8 +1,8 @@
 const httpProxy = require('express-http-proxy');
 
-const userServiceProxy = httpProxy('http://localhost:4000');
-const productServiceProxy = httpProxy('http://localhost:3000');
-const orderServiceProxy = httpProxy('http://localhost:2000');
+const userServiceProxy = httpProxy(process.env.USER_SERVICE_URL);
+const productServiceProxy = httpProxy(process.env.PRODUCT_SERVICE_URL);
+const orderServiceProxy = httpProxy(process.env.ORDER_SERVICE_URL);
 
 class Routes {
   constructor(app) {

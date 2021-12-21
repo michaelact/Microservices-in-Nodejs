@@ -25,4 +25,6 @@ class MongoDB {
   }
 }
 module.exports.MongoDB = new MongoDB();
-module.exports.redisClient = redis.createClient();
+module.exports.redisClient = redis.createClient({
+  url: `redis://${process.env.REDIS_DB_URL}:${process.env.REDIS_DB_PORT}`
+});
