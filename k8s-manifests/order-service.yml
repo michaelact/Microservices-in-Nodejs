@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderservice
+spec:
+  selector:
+    matchLabels:
+      app: orderservice
+  template:
+    metadata:
+      labels:
+        app: orderservice
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: orderservice
+        image: docker.io/michaelact/st-orderservice
+        ports:
+        - containerPort: 2000
+        env:
+        - name: NODE_SERVER_POST
+          value: "2000"
+        - name: NODE_SERVER_HOST
+          value: 0.0.0.0
+        - name: REDIS_DB_PORT
+          value: "6379"
+        - name: REDIS_DB_URL
+          value: redisservice
+        - name: MONGODB_DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: app-creds
+              key: mongodburl
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-creds
+              key: jwtsecret
+        resources:
+          requests:
+            cpu: 200m
+            memory: 180Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderservice
+spec:
+  type: ClusterIP
+  selector:
+    app: orderservice
+  ports:
+  - name: api
+    port: 2000
+    targetPort: 2000

@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userservice
+spec:
+  selector:
+    matchLabels:
+      app: userservice
+  template:
+    metadata:
+      labels:
+        app: userservice
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: userservice
+        image: docker.io/michaelact/st-userservice
+        ports:
+        - containerPort: 4000
+        env:
+        - name: NODE_SERVER_POST
+          value: "4000"
+        - name: NODE_SERVER_HOST
+          value: 0.0.0.0
+        - name: REDIS_DB_PORT
+          value: "6379"
+        - name: REDIS_DB_URL
+          value: redisservice
+        - name: MONGODB_DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: app-creds
+              key: mongodburl
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-creds
+              key: jwtsecret
+        resources:
+          requests:
+            cpu: 200m
+            memory: 180Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: userservice
+spec:
+  type: ClusterIP
+  selector:
+    app: userservice
+  ports:
+  - name: api
+    port: 4000
+    targetPort: 4000

@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apigateway
+spec:
+  selector:
+    matchLabels:
+      app: apigateway
+  template:
+    metadata:
+      labels:
+        app: apigateway
+    spec:
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 5
+      containers:
+      - name: apigateway
+        image: docker.io/michaelact/st-apigateway
+        ports:
+        - containerPort: 8000
+        env:
+        - name: NODE_SERVER_POST
+          value: "8000"
+        - name: NODE_SERVER_HOST
+          value: 0.0.0.0
+        - name: USER_SERVICE_URL
+          value: http://userservice:4000
+        - name: PRODUCT_SERVICE_URL
+          value: http://productservice:3000
+        - name: ORDER_SERVICE_URL
+          value: http://orderservice:2000
+        resources:
+          requests:
+            cpu: 200m
+            memory: 180Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apigateway
+spec:
+  type: LoadBalancer
+  selector:
+    app: apigateway
+  ports:
+  - name: api
+    port: 80
+    targetPort: 8000
